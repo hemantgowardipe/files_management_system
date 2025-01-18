@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Files - File Management Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .sidebar.minimized {
+            width: 80px;
+        }
+
+        .sidebar h4 {
+            text-align: center;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .sidebar.minimized h4 {
+            opacity: 0;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+            transition: background-color 0.3s, padding 0.3s;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar.minimized a {
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .sidebar.minimized a .link-text {
+            display: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .content.minimized {
+            margin-left: 80px;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: -20px;
+            background-color: #343a40;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .form-check-input:checked {
+            background-color: #ffcc00;
+            border-color: #ffcc00;
+            box-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-check-input {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .profile-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-dropdown {
+            margin-right: 10px;
+        }
+
+        .dropdown-menu {
+            min-width: 200px;
+        }
+
+        .dropdown-item.dark-mode-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upload-options {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .upload-options h4 {
+            margin-bottom: 15px;
+        }
+
+        .upload-button {
+            padding: 10px 20px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .upload-button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .profile-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .profile-dropdown {
+                margin-right: 0;
+            }
+
+            .btn-primary {
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .sidebar.minimized {
+                width: 70px;
+            }
+
+            .content {
+                margin-left: 200px;
+            }
+
+            .content.minimized {
+                margin-left: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <h4>File Manager</h4>
+    <a href="dashboard.html"><i class="bi bi-house"></i> <span class="link-text">Dashboard</span></a>
+    <a href="upload.html" class="active"><i class="bi bi-upload"></i> <span class="link-text">Upload Files</span></a>
+    <a href="managefiles.html"><i class="bi bi-folder"></i> <span class="link-text">Manage Files</span></a>
+    <a href="login.html"><i class="bi bi-box-arrow-in-right"></i> <span class="link-text">Login</span></a>
+    <button class="toggle-btn" id="toggle-btn">&#x25C0;</button>
+</div>
+
+<div class="content" id="content">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Upload Files</h2>
+        <div class="dropdown profile-section">
+            <div class="profile-dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i> Profile
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                    <li><span class="dropdown-item">user@example.com</span></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Logout</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item dark-mode-toggle" href="#">
+                            Dark Mode
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="darkModeSwitch">
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <div class="upload-options">
+        <h4>Select Upload Type</h4>
+        <button class="upload-button" onclick="document.getElementById('uploadFolder').click();">Upload Folder</button>
+        <button class="upload-button" onclick="document.getElementById('uploadFile').click();">Upload File</button>
+        <button class="upload-button" onclick="document.getElementById('uploadImage').click();">Upload Image</button>
+
+        <!-- Hidden file input for uploading folder -->
+        <input type="file" id="uploadFolder" class="file-input" webkitdirectory directory multiple />
+
+        <!-- Hidden file input for uploading any file -->
+        <input type="file" id="uploadFile" class="file-input" multiple />
+
+        <!-- Hidden file input for uploading image files -->
+        <input type="file" id="uploadImage" class="file-input" accept="image/*" multiple />
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
+    const toggleBtn = document.getElementById('toggle-btn');
+
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('minimized');
+        content.classList.toggle('minimized');
+        toggleBtn.innerHTML = sidebar.classList.contains('minimized') ? '&#x25BA;' : '&#x25C0;';
+    });
+
+    const darkModeSwitch = document.getElementById('darkModeSwitch');
+
+    darkModeSwitch.addEventListener('change', () => {
+        if (darkModeSwitch.checked) {
+            document.body.classList.add('bg-dark', 'text-white');
+            document.body.classList.remove('bg-light', 'text-dark');
+        } else {
+            document.body.classList.add('bg-light', 'text-dark');
+            document.body.classList.remove('bg-dark', 'text-white');
+        }
+    });
+
+    document.getElementById('loginButton').addEventListener('click', () => {
+        // Placeholder for login action
+        alert('Login button clicked!');
+    });
+</script>
+</body>
+</html>
