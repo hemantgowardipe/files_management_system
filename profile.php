@@ -1,0 +1,168 @@
+<?php 
+    session_start();
+    include('connect.php');
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+        body {
+            background: #f4f6f9;
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+        }
+        .profile-container {
+            max-width: 450px;
+            margin: 60px auto;
+            padding: 30px;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            position: relative;
+        }
+        .profile-container:hover {
+            transform: translateY(-5px);
+        }
+        .edit-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #007bff;
+            transition: 0.3s;
+        }
+        .edit-btn i {
+            font-size: 22px;
+        }
+        .edit-btn:hover {
+            color: #0056b3;
+        }
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #007bff;
+        }
+        .info-section {
+            font-size: 16px;
+            color: #555;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .info-section:last-child {
+            border-bottom: none;
+        }
+        .password-field {
+            -webkit-text-security: disc;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .profile-card {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            color: white;
+            text-align: center;
+        }
+        .profile-name {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .extra-info {
+            background: #ffffff;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .storage-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+        .progress {
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #e9ecef;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #ff8c00, #ff3d00);
+        }
+        @media (max-width: 768px) {
+            .profile-container {
+                max-width: 90%;
+                padding: 20px;
+                margin: 30px auto;
+            }
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+            .info-section {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <!-- Calling the email from database -->
+    <?php 
+        $sql = mysqli_query($con,"SELECT * FROM register WHERE id = '".$_SESSION['id']."' ");
+        while($abc = mysqli_fetch_array($sql)){
+    ?>
+        <div class="profile-container">
+            <button class="edit-btn" title="Edit Profile">
+                <i class="bi bi-pencil-fill"></i>
+            </button>
+            <div class="profile-card">
+                <img src="<?php echo "profile_img/" .$abc['photo']?>" alt="Profile Photo" class="profile-photo">
+                <h3 class="profile-name"><?php echo $abc['name']?></h3>
+            </div>
+            <p class="info-section"><span class="info-label">Email:</span> <?php echo $abc['email']?></p>
+            <p class="info-section"><span class="info-label">Username:</span> johndoe</p>
+            <p class="info-section"><span class="info-label">Phone: +91</span> <?php echo $abc['mobile']?></p>
+            <p class="info-section"><span class="info-label">Password:</span> <span class="password-field"><?php echo $abc['pass']?></span></p>
+        </div>
+        <?php } ?>
+        
+        <div class="container-fluid">
+            <div class="extra-info">
+                <p class="info-label">Total Documents Uploaded</p>
+                <h4 class="text-primary">120</h4>
+                <div class="storage-section">
+                    <span class="info-label">Storage Usage</span>
+                    <span class="text-muted">4GB / 10GB</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 20%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+        <br><br>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
