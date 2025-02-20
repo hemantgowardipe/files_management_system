@@ -27,7 +27,7 @@ function uploadFile($fileInputName, $fileType, $dbCon, $userId) {
         $uploadPath = $uploadDir . $newFileName;
         
         // Move file to upload directory
-        if (move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/" . $newFileName)) {
+        if (move_uploaded_file($fileTmpName, $uploadPath)) {
             $query = "INSERT INTO uploads (user_id, file_name, file_path, file_type, file_size, upload_time) 
                       VALUES (?, ?, ?, ?, ?, NOW())";
             $stmt = mysqli_prepare($dbCon, $query);
@@ -78,6 +78,15 @@ if (isset($_POST['uimgage'])) {
     min-height: 100vh;
     overflow-x: hidden;
 }
+
+.uploading {
+    display: none;
+    text-align: center;
+    margin-top: 20px; /* Push it below the form */
+    position: relative; /* Keep it in proper alignment */
+    z-index: 1; /* Prevents it from going behind other elements */
+}
+
 
 .sidebar {
     width: 250px;
@@ -323,7 +332,6 @@ if (isset($_POST['uimgage'])) {
              <input type="file" name="image" required>
              <button type="submit" name="uimgage" class="upload-button btn btn-sm"><i class="bi bi-file-earmark-image"></i> Upload Image</button>
         </form>
-    </div>
     <div class="uploading" id="uploading">
         <p>Uploading<span class="dot-animation"><span>.</span><span>.</span><span>.</span></span></p>
     </div>

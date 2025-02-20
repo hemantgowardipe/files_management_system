@@ -7,11 +7,12 @@
 
     // Fetch recent files query
     $recentFilesQuery = mysqli_query($con, "
-    SELECT file_name, file_type, uploaded_at 
-    FROM uploads 
-    WHERE user_id = '$user_id' 
-    ORDER BY uploaded_at DESC 
-    LIMIT 5
+    SELECT file_name, file_type, file_size, uploaded_at 
+FROM uploads 
+WHERE user_id = '$user_id' 
+ORDER BY uploaded_at DESC 
+LIMIT 5
+
     ");
 
     // Fetch file counts from uploads table based on user_id
@@ -334,23 +335,27 @@
         </tr>
     </thead>
     <tbody>
-        <?php
-        $count = 1;
-        while ($row = mysqli_fetch_assoc($recentFilesQuery)) {
-            $filePath = "uploads/" . $row['file_name']; // Adjust the path if necessary
+    <?php
+    $count = 1;
+    while ($row = mysqli_fetch_assoc($recentFilesQuery)) {
+        $filePath = "uploads/" . urlencode($row['file_name']);
+        $fileSizeMB = number_format($row['file_size'] / 1048576, 2) . ' MB'; // Convert bytes to MB
         ?>
-            <tr>
-                <td><?php echo $count++; ?></td>
-                <td><?php echo htmlspecialchars($row['file_name']); ?></td>
-                <td><?php echo htmlspecialchars($row['file_type']); ?></td>
-                <td><?php echo $row['uploaded_at']; ?></td>
-                <td>
-                <a href="preview.php?file=<?php echo urlencode($row['file_name']); ?>" class="btn btn-primary" target="_blank">Preview</a>
+        <tr>
+            <td><?php echo $count++; ?></td>
+            <td><?php echo htmlspecialchars($row['file_name']) . " ($fileSizeMB)"; ?></td>
+            <td><?php echo htmlspecialchars($row['file_type']); ?></td>
+            <td><?php echo $row['uploaded_at']; ?></td>
+            <td>
+                <!-- Download Button -->
+                <a href="<?php echo $filePath; ?>" download class="btn btn-info">Preview</a>
 
-                </td>
-            </tr>
-        <?php } ?>
-    </tbody>
+                <!-- Rename Button -->
+                <button class="btn btn-default rename-btn" data-filename="<?php echo htmlspecialchars($row['file_name']); ?>">Rename</button>
+            </td>
+        </tr>
+    <?php } ?>
+</tbody>
 </table>
 </div>
 </div>
@@ -368,5 +373,33 @@
         toggleBtn.innerHTML = sidebar.classList.contains('minimized') ? '&#x25BA;' : '&#x25C0;';
     });
 </script>
+<script>
+document.querySelectorAll('.rename-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        let oldName = this.getAttribute('data-filename');
+        let newName = prompt("Enter the new file name:", oldName);
+
+        if (newName && newName.trim() !== "" && newName !== oldName) {
+            let formData = new FormData();
+            formData.append("old_name", oldName);
+            formData.append("new_name", newName);
+
+            fetch("rename.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === "success") {
+                    location.reload(); // Refresh page on success
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    });
+});
+</script>
+
 </body>
 </html>
