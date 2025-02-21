@@ -18,7 +18,7 @@
        if($row>0)
        {
            echo "<script>
-               window.location.href='index.php';
+               window.top.location.href='dashboard.php';
            </script>";
        }
        else
@@ -115,7 +115,7 @@
 
         <!-- Registration Note -->
         <div class="note">
-            <p>Don't have an account? <a href="register.php">Register here</a></p>
+            <p>Don't have an account? <a href="register.php" target="_blank">Register here</a></p>
             <p>Admin Login<a href="admin.php"> Admin Panel</a></p>
         </div>
     </form>

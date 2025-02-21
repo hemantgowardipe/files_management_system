@@ -1,405 +1,272 @@
 <?php 
     session_start();
-    include('connect.php');
-
-    // Get the logged-in user ID
-    $user_id = $_SESSION['id'];
-
-    // Fetch recent files query
-    $recentFilesQuery = mysqli_query($con, "
-    SELECT file_name, file_type, file_size, uploaded_at 
-FROM uploads 
-WHERE user_id = '$user_id' 
-ORDER BY uploaded_at DESC 
-LIMIT 5
-
-    ");
-
-    // Fetch file counts from uploads table based on user_id
-    $countQuery = mysqli_query($con, "
-        SELECT file_type, COUNT(*) AS total 
-        FROM uploads 
-        WHERE user_id = '$user_id' 
-        GROUP BY file_type
-    ");
-
-    // Initialize counts
-    $imageCount = 0;
-    $videoCount = 0;
-    $folderCount = 0;
-
-    // Process query results
-    while ($row = mysqli_fetch_assoc($countQuery)) {
-        if ($row['file_type'] == 'image') {
-            $imageCount = $row['total'];
-        } elseif ($row['file_type'] == 'video') {
-            $videoCount = $row['total'];
-        } elseif ($row['file_type'] == 'folder') {
-            $folderCount = $row['total'];
-        }
-    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Management Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <title>Real-Time File Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt"></script>
     <style>
-        
         body {
-            display: flex;
-            min-height: 100vh;
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
             overflow-x: hidden;
         }
-
-        .sidebar {
-            width: 250px;
-            height: 100vh;
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        .background-animation {
             position: fixed;
-            background-color: #343a40;
-            color: white;
-            padding-top: 20px;
-            transition: width 0.3s ease-in-out;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
         }
-
-        .sidebar.minimized {
-            width: 80px;
+        .icon-animation {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            opacity: 0.3;
+            animation: floatAnimation linear infinite;
         }
-
-        .sidebar h4 {
-            text-align: center;
+        .file-animation {
+            position: absolute;
+            width: 60px;
+            opacity: 1;
+            transition: all 0.7s ease-in-out;
+        }
+        .bin {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 70px;
+            opacity: 0;
             transition: opacity 0.3s ease-in-out;
         }
-
-        .sidebar.minimized h4 {
-            opacity: 0;
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
         }
-
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            margin: 10px 0;
-            border-radius: 4px;
-            transition: background-color 0.3s, padding 0.3s;
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px;
         }
-
-        .sidebar a i {
-            margin-right: 10px;
-            font-size: 1.2rem;
+        .hero {
+            padding: 100px 20px;
+            position: relative;
         }
-
-        .sidebar.minimized a {
-            justify-content: center;
-            padding: 10px;
-        }
-
-        .sidebar.minimized a .link-text {
-            display: none;
-        }
-
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            width: 100%;
-            transition: margin-left 0.3s ease-in-out;
-        }
-
-        .content.minimized {
-            margin-left: 80px;
-        }
-
-        .toggle-btn {
-            position: absolute;
-            top: 20px;
-            right: -20px;
-            background-color: #343a40;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        .tilt-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
             transition: transform 0.3s ease-in-out;
         }
-
-        .toggle-btn:hover {
-            transform: rotate(90deg);
+        .tilt-card:hover {
+            transform: translateY(-10px) scale(1.05);
         }
-
-        .form-check-input:checked {
-            background-color: #ffcc00;
-            border-color: #ffcc00;
-            box-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00;
-            transition: all 0.3s ease-in-out;
+        .modal-dialog {
+            max-width: 400px;
         }
-
-        .form-check-input {
-            transition: all 0.3s ease-in-out;
-        }
-
-
-        .card {
-            margin-top: 20px;
-            position: relative;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .add-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #0d6efd;
+        .modal-content {
+            background: #333;
             color: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        @keyframes vibrate {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-2px, 2px); }
+            50% { transform: translate(2px, -2px); }
+            75% { transform: translate(-2px, 2px); }
+            100% { transform: translate(0, 0); }
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
             border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            transition: 0.3s;
         }
-
-        .add-button:hover {
-            background-color: #0056b3;
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
         }
-
-        .card-logo {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #fff;
+        .footer {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
         }
-
-        .card-logo.img {
-            color: #FF5733;
-        }
-
-        .card-logo.video {
-            color: #33C1FF;
-        }
-
-        .card-logo.doc {
-            color: #28A745;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
         @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
+            .tilt-card {
+                width: 90%;
             }
-
-            .sidebar.minimized {
-                width: 60px;
+            .navbar .btn {
+                font-size: 14px;
+                padding: 5px 10px;
             }
-
-            .content {
-                margin-left: 200px;
+            .hero h1 {
+                font-size: 24px;
             }
-
-            .content.minimized {
-                margin-left: 60px;
-            }
-
-            .table {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-
-            .sidebar.minimized {
-                width: 100%;
-                height: auto;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-
-            .toggle-btn {
-                position: absolute;
-                top: 10px;
-                left: 10px;
+            .hero p {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
-<div class="sidebar" id="sidebar">
-    <h4>File Manager</h4>
-    <a href="index.php" class="active"><i class="bi bi-house"></i> <span class="link-text">Dashboard</span></a>
-    <a href="upload.php"><i class="bi bi-upload"></i> <span class="link-text">Upload Files</span></a>
-    <a href="managefiles.php"><i class="bi bi-folder"></i> <span class="link-text">Manage Files</span></a>
-    <a href="login.php"><i class="bi bi-box-arrow-in-right"></i> <span class="link-text">Login</span></a>
-    <button class="toggle-btn" id="toggle-btn">&#x25C0;</button>
-</div>
-
-<div class="content" id="content">
-    <!-- Calling the email from database -->
-    <?php 
-        $sql = mysqli_query($con,"SELECT * FROM register WHERE id = '".$_SESSION['id']."' ");
-        while($abc = mysqli_fetch_array($sql)){
-    ?>
-    <div class="d-flex justify-content-between align-items-center">
-        <h2>Dashboard</h2>
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle"> </i> Profile
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                <li><a class="dropdown-item"><?php echo $abc['email']?></a></li>
-                <?php } ?>
-                <li><a class="dropdown-item" href="profile.php">View Profile</a></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
+    <div class="container-fluid">
+    <div class="background-animation">
+        <i class="fa fa-file icon-animation" style="top: 10%; left: 20%; animation-duration: 6s;"></i>
+        <i class="fa fa-folder icon-animation" style="top: 30%; left: 50%; animation-duration: 8s;"></i>
+        <i class="fa fa-video icon-animation" style="top: 50%; left: 70%; animation-duration: 10s;"></i>
+        <i class="fa fa-file-alt icon-animation" style="top: 70%; left: 30%; animation-duration: 7s;"></i>
+        <i class="fa fa-folder-open icon-animation" style="top: 85%; left: 60%; animation-duration: 9s;"></i>
+    </div>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fa fa-cloud"></i> File Manager</a>
+            <div class="ms-auto d-flex align-items-center">
+                <?php if (isset($_SESSION['user_email'])): ?>
+                    <span class="text-white me-3"><?= htmlspecialchars($_SESSION['user_email']); ?></span>
+                    <img src="<?= isset($_SESSION['user_profile']) ? htmlspecialchars($_SESSION['user_profile']) : 'default-profile.png'; ?>" 
+                         alt="Profile" class="profile-pic me-3">
+                    <a href="logout.php" class="btn btn-outline-light">Logout</a>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-outline-light me-2">Login</a>
+                    <a href="register.php" class="btn btn-light text-dark">Sign Up</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="hero">
+        <h1 class="fw-bold">Manage Your Files in Real-Time, Anywhere!</h1>
+        <p class="lead">Secure, Fast, and Intuitive Cloud Storage for modern users.</p>
+        <a href="#" class="btn btn-primary" id="getStartedBtn">Get Started</a>
+    </div>
+    
+    <div class="container d-flex flex-wrap justify-content-center mt-5">
+        <div class="tilt-card col-md-3" data-tilt>
+            <i class="fa fa-users fa-3x mb-3"></i>
+            <h3>Live Collaboration</h3>
+            <p>Share and edit files in real-time with your team.</p>
+        </div>
+        <div class="tilt-card col-md-3" data-tilt>
+            <i class="fa fa-lock fa-3x mb-3"></i>
+            <h3>Secure Storage</h3>
+            <p>End-to-end encryption keeps your data safe.</p>
+        </div>
+        <div class="tilt-card col-md-3" data-tilt>
+            <i class="fa fa-bolt fa-3x mb-3"></i>
+            <h3>Fast Access</h3>
+            <p>Optimized performance for instant file retrieval.</p>
         </div>
     </div>
-    <hr>
-    <div class="row">
-        <!-- Card for Images -->
-        <div class="col-md-4">
-            <div class="card text-center" onclick="location.href='managefiles.php';" style="cursor: pointer;">
-                <div class="card-body">
-                    <i class="bi bi-image card-logo img"></i>
-                    <h5 class="card-title">Images</h5>
-                    <p class="card-text fs-1"><?php echo $imageCount; ?></p>
-                    <button class="add-button" onclick="event.stopPropagation(); location.href='upload.php';">+</button>
-                </div>
-            </div>
-        </div>
     
-        <!-- Card for Videos -->
-        <div class="col-md-4">
-            <div class="card text-center" onclick="location.href='managefiles.php';" style="cursor: pointer;">
-                <div class="card-body">
-                    <i class="bi bi-camera-video card-logo video"></i>
-                    <h5 class="card-title">Videos</h5>
-                    <p class="card-text fs-1"><?php echo $videoCount; ?></p>
-                    <button class="add-button" onclick="event.stopPropagation(); location.href='upload.php';">+</button>
+    <footer class="footer">
+        <p>&copy; 2025 File Management System | <a href="#" class="text-light">Privacy Policy</a></p>
+    </footer>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe id="loginFrame" src="login.php" width="100%" height="400px" style="border: none;"></iframe>
                 </div>
             </div>
         </div>
+    </div>
     
-        <!-- Card for Documents -->
-        <div class="col-md-4">
-            <div class="card text-center" onclick="location.href='managefiles.php';" style="cursor: pointer;">
-                <div class="card-body">
-                    <i class="bi bi-file-earmark-text card-logo doc"></i>
-                    <h5 class="card-title">Documents</h5>
-                    <p class="card-text fs-1"><?php echo $folderCount; ?></p>
-                    <button class="add-button" onclick="event.stopPropagation(); location.href='upload.php';">+</button>
-                </div>
-            </div>
-        </div>
-    </div>  
-    <hr>
-<h3>Recent Uploads</h3>
-<div class="table-responsive">
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>SR.No</th>
-            <th>File Name</th>
-            <th>File Type</th>
-            <th>Uploaded At</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-    <?php
-    $count = 1;
-    while ($row = mysqli_fetch_assoc($recentFilesQuery)) {
-        $filePath = "uploads/" . urlencode($row['file_name']);
-        $fileSizeMB = number_format($row['file_size'] / 1048576, 2) . ' MB'; // Convert bytes to MB
-        ?>
-        <tr>
-            <td><?php echo $count++; ?></td>
-            <td><?php echo htmlspecialchars($row['file_name']) . " ($fileSizeMB)"; ?></td>
-            <td><?php echo htmlspecialchars($row['file_type']); ?></td>
-            <td><?php echo $row['uploaded_at']; ?></td>
-            <td>
-                <!-- Download Button -->
-                <a href="<?php echo $filePath; ?>" download class="btn btn-info">Preview</a>
+    
+    <script>
+        $(document).ready(function () {
+            let checkLoginInterval;
 
-                <!-- Rename Button -->
-                <button class="btn btn-default rename-btn" data-filename="<?php echo htmlspecialchars($row['file_name']); ?>">Rename</button>
-            </td>
-        </tr>
-    <?php } ?>
-</tbody>
-</table>
-</div>
-</div>
+            $("#getStartedBtn").click(function () {
+                $.ajax({
+                    url: "check_login.php",
+                    type: "GET",
+                    cache: false,
+                    success: function (response) {
+                        if (response.trim() === "logged_in") {
+                            window.location.href = "dashboard.php";
+                        } else {
+                            $("#loginModal").modal("show");
 
+                            // Periodically check if the user has logged in
+                            checkLoginInterval = setInterval(function () {
+                                $.ajax({
+                                    url: "check_login.php",
+                                    type: "GET",
+                                    cache: false,
+                                    success: function (response) {
+                                        if (response.trim() === "logged_in") {
+                                            clearInterval(checkLoginInterval); // Stop checking
+                                            $("#loginModal").modal("hide"); // Hide the modal
+                                            window.location.href = "dashboard.php"; // Redirect
+                                        }
+                                    }
+                                });
+                            }, 2000); // Check every 2 seconds
+                        }
+                    },
+                    error: function () {
+                        alert("Error checking login status. Please try again.");
+                    }
+                });
+            });
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const sidebar = document.getElementById('sidebar');
-    const content = document.getElementById('content');
-    const toggleBtn = document.getElementById('toggle-btn');
+            // Stop checking when modal is closed manually
+            $("#loginModal").on("hidden.bs.modal", function () {
+                clearInterval(checkLoginInterval);
+            });
+        });
+    </script>
+    <!-- Titl card hover script -->
+     <script>
+        $(document).ready(function() {
+            VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
+                max: 25,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.5
+            });
+        });
+     </script>
 
-    toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('minimized');
-        content.classList.toggle('minimized');
-        toggleBtn.innerHTML = sidebar.classList.contains('minimized') ? '&#x25BA;' : '&#x25C0;';
-    });
-</script>
-<script>
-document.querySelectorAll('.rename-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        let oldName = this.getAttribute('data-filename');
-        let newName = prompt("Enter the new file name:", oldName);
-
-        if (newName && newName.trim() !== "" && newName !== oldName) {
-            let formData = new FormData();
-            formData.append("old_name", oldName);
-            formData.append("new_name", newName);
-
-            fetch("rename.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.status === "success") {
-                    location.reload(); // Refresh page on success
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-    });
-});
-</script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

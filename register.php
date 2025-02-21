@@ -42,7 +42,7 @@
 
         echo"<script>
             alert('Registration Successful...');
-            window.location.href='index.php';
+            window.location.href='login.php';
         </script>";
 
     }
