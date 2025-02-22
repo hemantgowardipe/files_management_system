@@ -7,27 +7,18 @@
        $user = $_POST['user'];
        $pass = $_POST['pass'];
 
-       $sql = mysqli_query($con,"SELECT * FROM `register` WHERE `email` = '$user' AND `pass` = '$pass' ");
-       $row = mysqli_num_rows($sql);
-       while($result = mysqli_fetch_assoc($sql))
-       {
-           // session used to fix the data 
-          $_SESSION['id'] = $result['id'];
-          $_SESSION['name'] = $result['name'];
-       }
-       if($row>0)
-       {
-           echo "<script>
-               window.top.location.href='dashboard.php';
-           </script>";
-       }
-       else
-       {
-           echo "<script>
-               alert('Invalid Username or Password')
-           </script>";
-       }
-   }
+       if($user=='rajugowardipe0@gmail.com' && $pass='hemant@2005')
+        {
+            $_SESSION['aname'] = $user;
+            header('location:admin_dashboard.php');
+        }
+        else
+        {
+            echo "<script>
+                alert('Invalid Entry');
+            </script>";
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,7 +82,7 @@
 <body>
 
 <div class="login-container">
-    <h3 class="text-center mb-4">Login</h3>
+    <h3 class="text-center mb-4">Admin Login</h3>
     <form method="post">
         <!-- Email Input -->
         <div class="form-group mb-3">
@@ -116,7 +107,7 @@
         <!-- Registration Note -->
         <div class="note">
             <p>Don't have an account? <a href="register.php" target="_blank">Register here</a></p>
-            <p>Admin Login<a href="admin/admin_login.php" target="_blank"> Admin Panel</a></p>
+            <p>User Login<a href="../login.php"> Login</a></p>
         </div>
     </form>
 </div>
