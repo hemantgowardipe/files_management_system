@@ -254,7 +254,7 @@ LIMIT 5
 <body>
 <div class="sidebar" id="sidebar">
     <h4>File Manager</h4>
-    <a href="index.php" class="active"><i class="bi bi-house"></i> <span class="link-text">Dashboard</span></a>
+    <a href="dashboard.php" class="active"><i class="bi bi-house"></i> <span class="link-text">Dashboard</span></a>
     <a href="upload.php"><i class="bi bi-upload"></i> <span class="link-text">Upload Files</span></a>
     <a href="managefiles.php"><i class="bi bi-folder"></i> <span class="link-text">Manage Files</span></a>
     <a href="login.php"><i class="bi bi-box-arrow-in-right"></i> <span class="link-text">Login</span></a>
