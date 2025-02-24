@@ -35,107 +35,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f6f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .login-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .form-group {
-            position: relative;
-        }
-
-        .form-group .eye-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-
-        .note {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .note a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .note a:hover {
-            text-decoration: underline;
-        }
-
-        .btn-primary {
-            width: 100%;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.0.0/dist/full.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-<div class="login-container">
-    <h3 class="text-center mb-4">Login</h3>
-    <form method="post">
+<div class="card w-full max-w-sm bg-white shadow-xl p-8 rounded-lg">
+    <h2 class="text-center text-2xl font-bold text-gray-800 mb-4">Login</h2>
+    
+    <form method="post" class="space-y-4">
         <!-- Email Input -->
-        <div class="form-group mb-3">
-            <label for="email">Email address</label>
-            <input type="email" name="user" class="form-control" id="email" placeholder="Enter your email" required>
-        </div>
-
-        <!-- Password Input with Eye Icon -->
-        <div class="form-group mb-3">
-            <label for="password">Password</label>
-            <div class="input-group">
-                <input type="password" name="pass" class="form-control" id="password" placeholder="Enter your password" required>
-                <span class="input-group-text eye-icon" id="eyeIcon">
-                    <i class="bi bi-eye-slash"></i>
-                </span>
+        <label class="form-control w-full">
+            <div class="label">
+                <span class="label-text">Email Address</span>
             </div>
-        </div>
+            <input type="email" name="user" class="input input-bordered w-full" placeholder="Enter your email" required />
+        </label>
+
+        <!-- Password Input -->
+        <label class="form-control w-full">
+            <div class="label">
+                <span class="label-text">Password</span>
+            </div>
+            <div class="relative">
+                <input type="password" name="pass" class="input input-bordered w-full pr-10" id="password" placeholder="Enter your password" required />
+                <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3" onclick="togglePassword()">
+                    <svg id="eyeIcon" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm8 0c0 4-4 8-8 8s-8-4-8-8 4-8 8-8 8 4 8 8z" />
+                    </svg>
+                </button>
+            </div>
+        </label>
 
         <!-- Login Button -->
-        <button type="submit" name="login" class="btn btn-primary mb-3">Login</button>
+        <button type="submit" name="login" onsubmit="showSuccessMessage(event)" class="btn btn-primary w-full">Login</button>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="hidden alert alert-success mt-4">Login Successful! Redirecting...</div>
 
         <!-- Registration Note -->
-        <div class="note">
-            <p>Don't have an account? <a href="register.php" target="_blank">Register here</a></p>
-            <p>Admin Login<a href="admin/admin_login.php" target="_blank"> Admin Panel</a></p>
-        </div>
+        <p class="text-center text-sm text-gray-600">Don't have an account? <a href="register.php" class="text-blue-500">Register here</a></p>
+        <p class="text-center text-sm text-gray-600">Admin Login <a href="admin/admin_login.php" class="text-blue-500">Admin Panel</a></p>
     </form>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Toggle password visibility
-    const passwordField = document.getElementById('password');
-    const eyeIcon = document.getElementById('eyeIcon');
-    
-    eyeIcon.addEventListener('click', () => {
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        
         if (passwordField.type === "password") {
             passwordField.type = "text";
-            eyeIcon.innerHTML = '<i class="bi bi-eye"></i>';
         } else {
             passwordField.type = "password";
-            eyeIcon.innerHTML = '<i class="bi bi-eye-slash"></i>';
         }
-    });
+    }
+
+    function showSuccessMessage(event) {
+        event.preventDefault(); // Prevent actual form submission for demo
+        const successMessage = document.getElementById("successMessage");
+        successMessage.classList.remove("hidden");
+        setTimeout(() => {
+            window.location.href = "dashboard.php";
+        }, 2000); // Redirect after 2 seconds
+    }
 </script>
 </body>
 </html>

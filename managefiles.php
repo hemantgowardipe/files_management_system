@@ -283,7 +283,6 @@
     <a href="dashboard.php" class="active"><i class="bi bi-house"></i> <span class="link-text">Dashboard</span></a>
     <a href="upload.php"><i class="bi bi-upload"></i> <span class="link-text">Upload Files</span></a>
     <a href="managefiles.php"><i class="bi bi-folder"></i> <span class="link-text">Manage Files</span></a>
-    <a href="login.php"><i class="bi bi-box-arrow-in-right"></i> <span class="link-text">Login</span></a>
     <button class="toggle-btn" id="toggle-btn">&#x25C0;</button>
 </div>
 
@@ -302,15 +301,13 @@
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                 <li><span class="dropdown-item"><?php echo $abc['email']?></span></li>
                 <?php } ?>
-                <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="profile.php">View Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="logout.php">Logout</a></li>
             </ul>
         </div>
     </div>
     <hr>
-
     <table class="table table-striped">
         <thead>
         <tr>
@@ -376,6 +373,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Slide bar toggle script -->
 <script>
     const sidebar = document.getElementById('sidebar');
     const content = document.getElementById('content');
@@ -393,5 +391,6 @@
         document.body.classList.toggle('bg-light');
     });
 </script>
+
 </body>
 </html>

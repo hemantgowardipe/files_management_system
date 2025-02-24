@@ -257,7 +257,6 @@ LIMIT 5
     <a href="dashboard.php" class="active"><i class="bi bi-house"></i> <span class="link-text">Dashboard</span></a>
     <a href="upload.php"><i class="bi bi-upload"></i> <span class="link-text">Upload Files</span></a>
     <a href="managefiles.php"><i class="bi bi-folder"></i> <span class="link-text">Manage Files</span></a>
-    <a href="login.php"><i class="bi bi-box-arrow-in-right"></i> <span class="link-text">Login</span></a>
     <button class="toggle-btn" id="toggle-btn">&#x25C0;</button>
 </div>
 
@@ -277,7 +276,6 @@ LIMIT 5
                 <li><a class="dropdown-item"><?php echo $abc['email']?></a></li>
                 <?php } ?>
                 <li><a class="dropdown-item" href="profile.php">View Profile</a></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="logout.php">Logout</a></li>
             </ul>
