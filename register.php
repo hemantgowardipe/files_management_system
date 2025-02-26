@@ -1,15 +1,16 @@
 <?php
 include('connect.php');
+include('send_mail.php'); // Include the mail file
 
 if (isset($_POST['reg'])) {
     $date = date('Y-m-d');
     $name = mysqli_real_escape_string($con, $_POST['name']);
     $mobile = mysqli_real_escape_string($con, $_POST['mobile']);
     $email = mysqli_real_escape_string($con, $_POST['email']);
-    $pass = mysqli_real_escape_string($con, $_POST['pass']); // Store plain-text password
+    $pass = mysqli_real_escape_string($con, $_POST['pass']); 
 
     $dir = 'profile_img/';
-    $photoName = "default.png"; // Default profile image
+    $photoName = "default.png";
 
     if (!empty($_FILES['photo']['name'])) {
         $photo = $_FILES['photo']['name'];
@@ -17,13 +18,13 @@ if (isset($_POST['reg'])) {
         $tmp_photo = $_FILES['photo']['tmp_name'];
         $error = $_FILES['photo']['error'];
 
-        $ext = strtolower(pathinfo($photo, PATHINFO_EXTENSION)); // Get file extension
+        $ext = strtolower(pathinfo($photo, PATHINFO_EXTENSION));
         $allowed = array('jpg', 'png', 'jpeg');
 
         if (in_array($ext, $allowed)) {
             if ($error === 0) {
-                if ($size < 50000000) { // 50MB limit
-                    $photoName = "profile_" . time() . "." . $ext; // Unique filename
+                if ($size < 50000000) { 
+                    $photoName = "profile_" . time() . "." . $ext;
                     move_uploaded_file($tmp_photo, $dir . $photoName);
                 } else {
                     echo "<script>alert('File size exceeds 50MB!');</script>";
@@ -39,12 +40,16 @@ if (isset($_POST['reg'])) {
         }
     }
 
-    // Insert user data into the database
     $stmt = $con->prepare("INSERT INTO register (date, name, mobile, email, photo, pass) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssss", $date, $name, $mobile, $email, $photoName, $pass);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Registration Successful!'); window.location.href='login.php';</script>";
+        // Send confirmation email
+        if (sendConfirmationEmail($email, $name)) {
+            echo "<script>alert('Registration Successful! A confirmation email has been sent.'); window.location.href='login.php';</script>";
+        } else {
+            echo "<script>alert('Registration Successful, but email failed to send.'); window.location.href='login.php';</script>";
+        }
     } else {
         echo "<script>alert('Database Error: Registration Failed.');</script>";
     }
@@ -53,6 +58,7 @@ if (isset($_POST['reg'])) {
     $con->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

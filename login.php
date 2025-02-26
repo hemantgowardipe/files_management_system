@@ -74,8 +74,8 @@
         <div id="successMessage" class="hidden alert alert-success mt-4">Login Successful! Redirecting...</div>
 
         <!-- Registration Note -->
-        <p class="text-center text-sm text-gray-600">Don't have an account? <a href="register.php" class="text-blue-500">Register here</a></p>
-        <p class="text-center text-sm text-gray-600">Admin Login <a href="admin/admin_login.php" class="text-blue-500">Admin Panel</a></p>
+        <p class="text-center text-sm text-gray-600">Don't have an account? <a href="register.php" target="_blank" class="text-blue-500">Register here</a></p>
+        <p class="text-center text-sm text-gray-600">Admin Login <a href="admin/admin_login.php" target="_blank" class="text-blue-500">Admin Panel</a></p>
     </form>
 </div>
 
