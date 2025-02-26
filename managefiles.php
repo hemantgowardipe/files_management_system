@@ -197,6 +197,48 @@
             transform: scale(1.2);
         }
 
+        /* Three-dot button (minimal, no bg, no border) */
+        .three-dot-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Remove focus border when clicked */
+        .three-dot-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* Dropdown menu styling */
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+            min-width: 150px;
+            z-index: auto;
+        }
+
+        /* Dropdown item hover effect */
+        .dropdown-item {
+            padding: 10px;
+            font-size: 14px;
+            transition: background 0.2s ease-in-out;
+            z-index: auto;
+        }
+
+        .dropdown-item:hover {
+            background: #f0f0f0;
+        }
+
+        /* Delete button in red */
+        .text-danger {
+            color: red !important;
+        }
+
+
         /* Media Queries for Mobile and Tablet Views */
         @media (max-width: 768px) {
         .sidebar {
@@ -318,57 +360,65 @@
         </tr>
         </thead>
         <tbody>
-            <?php 
-                // Get the logged-in user's ID
-        $user_id = $_SESSION['id'];
+    <?php 
+    $user_id = $_SESSION['id'];
 
-        // Fetch all uploaded files by the user
-        $query = mysqli_query($con, "SELECT * FROM uploads WHERE user_id = '$user_id'");
+    // Fetch all uploaded files by the user
+    $query = mysqli_query($con, "SELECT * FROM uploads WHERE user_id = '$user_id'");
 
+    $srNo = 1;
 
-        // Initialize counter
-        $srNo = 1;
+    if(mysqli_num_rows($query) > 0) {
+        while ($row = mysqli_fetch_assoc($query)) {
+            $fileId = $row['id'];
+            $fileName = $row['file_name'];
+            $fileType = $row['file_type'];
+            $filePath = $row['file_path'];
+            $fileSizeMB = number_format($row['file_size'] / 1048576,2) . 'MB'; 
 
-        // Check if there are files
-        if(mysqli_num_rows($query) > 0) {
-            while ($row = mysqli_fetch_assoc($query)) {
-                // Extract file details
-                $fileId = $row['id'];
-                $fileName = $row['file_name'];
-                $fileType = $row['file_type'];
-                $filePath = $row['file_path']; // Adjust according to your database structure
-
-                // Determine file type icon
-                $iconClass = "bi-file-earmark"; // Default icon
-                if (strpos($fileType, "image") !== false) {
-                    $iconClass = "bi-file-earmark-image";
-                } elseif (strpos($fileType, "video") !== false) {
-                    $iconClass = "bi-file-earmark-play";
-                } elseif (strpos($fileType, "pdf") !== false) {
-                    $iconClass = "bi-file-earmark-pdf";
-                } elseif (strpos($fileType, "doc") !== false) {
-                    $iconClass = "bi-file-earmark-word";
-                }
-            ?>
-        <tr>
-            <td><?php echo $srNo++; ?></td>
-            <td><i class="bi <?php echo $iconClass; ?>"></i></td>
-            <td><?php echo $fileName; ?></td>
-            <td>
-                <a href="<?php echo $filePath; ?>" class="btn btn-primary btn-sm" download>Download</a>
-                <a href="delete.php?file_id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this file?');">
-                Delete</a>
-                <a href="share.php?file_id=<?php echo $row['id']; ?>" class="btn btn-success btn-sm">
-                Share</a>
-            </td>
-        </tr>
-        <?php 
-            } 
-        } else {
-            echo "<tr><td colspan='4' class='text-center'>No files uploaded yet.</td></tr>";
-        }
+            // Determine file type icon
+            $iconClass = "bi-file-earmark"; 
+            if (strpos($fileType, "image") !== false) {
+                $iconClass = "bi-file-earmark-image";
+            } elseif (strpos($fileType, "video") !== false) {
+                $iconClass = "bi-file-earmark-play";
+            } elseif (strpos($fileType, "pdf") !== false) {
+                $iconClass = "bi-file-earmark-pdf";
+            } elseif (strpos($fileType, "doc") !== false) {
+                $iconClass = "bi-file-earmark-word";
+            }
+        ?>
+    <tr id="file-row-<?php echo $fileId; ?>">
+        <td><?php echo $srNo++; ?></td>
+        <td><i class="bi <?php echo $iconClass; ?>"></i></td>
+        <td>
+            <span id="file-name-<?php echo $fileId; ?>">
+                <?php echo htmlspecialchars($fileName) . "    ($fileSizeMB) "; ?>
+            </span>
+        </td>
+        <td>
+            <!-- Three-dot menu for actions -->
+            <div class="dropdown">
+                <button class="three-dot-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="<?php echo $filePath; ?>" download>📥 Download</a></li>
+                    <li><a class="dropdown-item text-danger delete-file" href="delete.php?file_id=<?php echo $fileId; ?>" onclick="return confirm('Are you sure you want to delete this file?');">🗑️ Delete</a></li>
+                    <li><a class="dropdown-item" href="share.php?file_id=<?php echo $fileId; ?>">🔗 Share</a></li>
+                    <li><button class="dropdown-item rename-btn" data-id="<?php echo $fileId; ?>" data-filename="<?php echo htmlspecialchars($fileName); ?>">✏️ Rename</button></li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+    <?php 
+        } 
+    } else {
+        echo "<tr><td colspan='4' class='text-center'>No files uploaded yet.</td></tr>";
+    }
     ?>
-        </tbody>
+</tbody>
+
     </table>
 </div>
 
@@ -391,6 +441,38 @@
         document.body.classList.toggle('bg-light');
     });
 </script>
+<!-- Rename Script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $(".rename-btn").click(function() {
+        let fileId = $(this).data("id");
+        let oldName = $(this).data("filename");
+        let newName = prompt("Enter new file name:", oldName);
+
+        if (newName && newName !== oldName) {
+            $.ajax({
+                url: "rename.php",
+                type: "POST",
+                data: { file_id: fileId, new_name: newName },
+                dataType: "json",
+                success: function(response) {
+                    if (response.status === "success") {
+                        $("#file-name-" + fileId).text(newName); // Update UI dynamically
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert("Error renaming file. Try again.");
+                }
+            });
+        }
+    });
+});
+</script>
+
 
 </body>
 </html>

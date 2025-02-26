@@ -1,51 +1,36 @@
 <?php
 session_start();
-include('connect.php'); // Ensure the database connection is established
+include('connect.php'); // Ensure database connection
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION['id']; // Get logged-in user ID
-    $oldName = trim($_POST['old_name']);
+    $file_id = intval($_POST['file_id']);
     $newName = trim($_POST['new_name']);
 
     // Validate input
-    if (empty($oldName) || empty($newName)) {
-        echo json_encode(["status" => "error", "message" => "Invalid file name."]);
+    if (empty($newName)) {
+        echo json_encode(["status" => "error", "message" => "File name cannot be empty."]);
         exit();
     }
 
-    // Prevent directory traversal attacks
-    $oldName = basename($oldName);
-    $newName = basename($newName);
+    // Prevent SQL Injection
+    $newName = mysqli_real_escape_string($con, $newName);
 
-    // Define file paths
-    $uploadDir = "uploads/"; // Ensure this directory is correct
-    $oldFilePath = $uploadDir . $oldName;
-    $newFilePath = $uploadDir . $newName;
+    // Check if file exists in DB
+    $query = mysqli_query($con, "SELECT * FROM uploads WHERE id = '$file_id' AND user_id = '$user_id'");
+    $file = mysqli_fetch_assoc($query);
 
-    // Debugging: Check if file exists
-    if (!file_exists($oldFilePath)) {
-        echo json_encode(["status" => "error", "message" => "File not found."]);
+    if (!$file) {
+        echo json_encode(["status" => "error", "message" => "File not found in database."]);
         exit();
     }
 
-    // Debugging: Check if new file name already exists
-    if (file_exists($newFilePath)) {
-        echo json_encode(["status" => "error", "message" => "A file with this name already exists."]);
-        exit();
-    }
-
-    // Rename file
-    if (rename($oldFilePath, $newFilePath)) {
-        // Update database record
-        $updateQuery = "UPDATE uploads SET file_name = '$newName' WHERE file_name = '$oldName' AND user_id = '$user_id'";
-        
-        if (mysqli_query($con, $updateQuery)) {
-            echo json_encode(["status" => "success", "message" => "File renamed successfully!"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Database update failed."]);
-        }
+    // Update database (Only change name in DB, not in storage)
+    $updateQuery = "UPDATE uploads SET file_name = '$newName' WHERE id = '$file_id' AND user_id = '$user_id'";
+    if (mysqli_query($con, $updateQuery)) {
+        echo json_encode(["status" => "success", "message" => "File name updated successfully!"]);
     } else {
-        echo json_encode(["status" => "error", "message" => "File rename failed due to permission issues."]);
+        echo json_encode(["status" => "error", "message" => "Database update failed."]);
     }
 }
 ?>

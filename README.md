@@ -25,8 +25,8 @@ A powerful **Real-Time File Management System** designed for efficient file hand
 
 **🏗 Tech Stack**
 
-- **Frontend:** JavaScript, jQuery UI, Tailwind CSS, Bootstrap  
-- **Backend:** PHP , PhpMyAdmin  
+- **Frontend:** JavaScript, jQuery UI, Tailwind CSS, Bootstrap , daisyUI 
+- **Backend:** PHP , PhpMyAdmin , PhpMailer
 - **Database:** MySQL  
 
 ---
@@ -89,12 +89,6 @@ Ensure you have the following installed:
 1. Fork the repository & create a new branch.
 2. Commit your changes & push them.
 3. Open a pull request.
-
----
-
-**📜 License**
-
-This project is licensed under the **MIT License**.
 
 ---
 
