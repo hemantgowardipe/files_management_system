@@ -31,7 +31,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
         echo "<script>alert('Error updating profile!');</script>";
     }
 }
+    // Time spent query start
+    $user_id = $_SESSION['id'];
 
+    // Fetch total time spent
+    $query = "SELECT SUM(duration) AS total_seconds, COUNT(id) AS session_count FROM user_activity WHERE user_id='$user_id'";
+    $result = mysqli_query($con, $query);
+    $row = mysqli_fetch_assoc($result);
+    
+    $total_seconds = $row ? $row['total_seconds'] : 0;
+    $session_count = $row ? $row['session_count'] : 1; // Avoid division by zero
+    
+    // Convert total seconds to hours, minutes, and seconds
+    $hours = floor($total_seconds / 3600);
+    $minutes = floor(($total_seconds % 3600) / 60);
+    $seconds = $total_seconds % 60;
+    
+    // Calculate average session duration
+    $avg_seconds = $total_seconds / $session_count;
+    $avg_hours = floor($avg_seconds / 3600);
+    $avg_minutes = floor(($avg_seconds % 3600) / 60);
+    $avg_seconds = floor($avg_seconds % 60);
+    // Time spent query end 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -95,6 +116,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
             <div class="stat">
                 <div class="stat-title">Total Storage Used</div>
                 <div class="stat-value text-muted">15GB</div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-4">
+            <div class="flex justify-between bg-gray-100 p-4 rounded-lg shadow-md">
+                <span class="text-gray-600 font-semibold">Total Time Spent:</span>
+                <span class="text-gray-800"><?php echo "$hours hrs $minutes min $seconds sec"; ?></span>
+            </div>
+
+            <div class="flex justify-between bg-gray-100 p-4 rounded-lg shadow-md">
+                <span class="text-gray-600 font-semibold">Average Time Per Session:</span>
+                <span class="text-gray-800"><?php echo "$avg_hours hrs $avg_minutes min $avg_seconds sec"; ?></span>
             </div>
         </div>
         
