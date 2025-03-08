@@ -7,36 +7,26 @@ if (!isset($_SESSION['id'])) {
 }
 
 if (isset($_GET['file_id'])) {
-    $file_id = intval($_GET['file_id']); // Sanitize input
-    $user_id = $_SESSION['id']; // Ensure user can only delete their own files
+    $file_id = intval($_GET['file_id']);
+    $user_id = $_SESSION['id'];
 
     // Fetch file details
-    $query = mysqli_query($con, "SELECT * FROM uploads WHERE id = '$file_id' AND user_id = '$user_id'");
-    $file = mysqli_fetch_assoc($query);
+    $file_query = mysqli_query($con, "SELECT * FROM uploads WHERE id = '$file_id' AND user_id = '$user_id'");
+    $file = mysqli_fetch_assoc($file_query);
 
     if ($file) {
-        $file_path = "uploads/" . $file['file_name']; // Adjust path if needed
+        // Move file details to recently_deleted table
+        $insert_query = "INSERT INTO recently_deleted (user_id, file_name, file_path) 
+                         VALUES ('$user_id', '{$file['file_name']}', '{$file['file_path']}')";
+        mysqli_query($con, $insert_query);
 
-        // Delete file from storage
-        if (file_exists($file_path)) {
-            unlink($file_path);
-        }
+        // Delete file from uploads table
+        $delete_query = "DELETE FROM uploads WHERE id = '$file_id'";
+        mysqli_query($con, $delete_query);
 
-        // Remove record from database
-        mysqli_query($con, "DELETE FROM uploads WHERE id = '$file_id' AND user_id = '$user_id'");
-
-        // Reorder IDs (Optional, only if you want to reset them)
-        mysqli_query($con, "SET @num := 0");
-        mysqli_query($con, "UPDATE uploads SET id = @num := (@num+1)");
-        mysqli_query($con, "ALTER TABLE uploads AUTO_INCREMENT = 1");
-
-        // Redirect with success message
-        header("Location: managefiles.php?message=File deleted successfully");
-        exit();
+        echo "<script>alert('File moved to Recently Deleted.'); window.location.href='managefiles.php';</script>";
     } else {
-        die("File not found or unauthorized access!");
+        echo "<script>alert('File not found!');</script>";
     }
-} else {
-    die("Invalid request!");
 }
 ?>
