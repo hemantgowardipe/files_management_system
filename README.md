@@ -14,6 +14,7 @@
 
 - [Overview](#-overview)
 - [Features](#-features)
+- [Workflow](#-workflow)
 - [Tech Stack](#-tech-stack)
 - [Installation & Setup](#-installation--setup)
 - [API Endpoints](#-api-endpoints)
@@ -42,6 +43,43 @@ A powerful **Real-Time File Management System** designed for efficient file hand
 - ✉️ **OTP Email Verification** – Enhance security with OTP for user authentication.
 - 👤 **Dynamic Profile Page** – View and manage all your details in one place, with a modern and user-friendly interface.
 - 📊 **Analytics Dashboard** – Gain insights into file usage and system performance with detailed analytics.
+
+---
+
+## 🔄 Workflow
+```mermaid
+graph TD;
+    %% User Authentication
+    A[User Registers/Login] -->|Email Verification| B{Authentication}
+    B -->|Valid User| C[Dashboard Access]
+    B -->|Forgot Password| D[OTP-Based Password Reset]
+
+    %% Core Functionalities
+    C --> E[Upload File] 
+    C --> F[Preview File] 
+    C --> G[Rename/Delete File] 
+    C --> H[Share File]
+
+    %% Security & Access Control
+    E -->|Apply Security| I[End-to-End Encryption]
+    I -->|RBAC Applied| J[Access Control Verification]
+
+    %% User Profile & Tracking
+    C --> K[Profile Section]
+    K --> L[Time Tracking & Session Monitoring]
+
+    %% Work in Progress
+    subgraph "🚧 Work in Progress 🚧"
+        M[Network Simulation] --> P[Optimize File Transfer]
+        N[Cloud Integration] --> Q[Scalability & Redundancy]
+        O[Social Media Sharing] --> R[API-Based File Sharing]
+    end
+
+    %% Connecting Work in Progress Features
+    C --> M
+    C --> N
+    C --> O
+```
 
 ---
 
@@ -134,7 +172,7 @@ Give a ⭐ if you like this project!
 
 ---
 
-## 🌐 Screenshots
+## 🌐 Live Demo & Screenshots
 
 <p align="center">
   <img src="assets/Screenshot 2025-03-05 235321.png" alt="Screenshot 1" width="400" height="250">
