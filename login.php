@@ -17,6 +17,7 @@ if(isset($_POST['login'])) {
             $user_id = $result['id'];
             $_SESSION['id'] = $user_id;
             $_SESSION['name'] = $result['name'];
+            $_SESSION['email'] = $result['email']; // Store email in session
             $_SESSION['login_time'] = time(); // Store login timestamp
 
             // Insert login record only if user_id exists

@@ -1,83 +1,104 @@
 <?php
 session_start();
-include('connect.php');
+require 'connect.php';
+require 'vendor/autoload.php'; // PHPMailer
+require 'vendor/vlucas/phpdotenv/src/Dotenv.php'; // Load .env file
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Load environment variables from .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 if (!isset($_SESSION['id'])) {
     die("Unauthorized access!");
 }
 
-if (isset($_GET['file_id'])) {
-    $file_id = intval($_GET['file_id']); // Sanitize input
-    $user_id = $_SESSION['id']; // Ensure user can only share their own files
+// Check if file_id is present in the URL
+if (!isset($_GET['file_id'])) {
+    die("Invalid request! No file selected.");
+}
 
-    // Fetch file details
-    $query = mysqli_query($con, "SELECT * FROM uploads WHERE id = '$file_id' AND user_id = '$user_id'");
-    $file = mysqli_fetch_assoc($query);
+$file_id = intval($_GET['file_id']);
+$user_id = $_SESSION['id'];
 
-    if ($file) {
-        $file_name = $file['file_name'];
-        $shareable_link = "http://localhost/file_system/download.php?file_id=" . $file_id; // Adjust for your server
+// Fetch file details
+$query = mysqli_query($con, "SELECT * FROM uploads WHERE id = '$file_id' AND user_id = '$user_id'");
+$file = mysqli_fetch_assoc($query);
 
-        ?>
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Share File</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-            <script>
-                function copyLink() {
-                    var copyText = document.getElementById("shareLink");
-                    copyText.select();
-                    document.execCommand("copy");
-                    alert("Link copied to clipboard!");
-                }
-            </script>
-            <style>
-                .share-buttons a {
-                    margin: 5px;
-                    text-decoration: none;
-                }
-            </style>
-        </head>
-        <body class="bg-light text-dark">
-            <div class="container mt-5 text-center">
-                <h2>Share File: <?php echo htmlspecialchars($file_name); ?></h2>
-                <input type="text" id="shareLink" class="form-control my-3 text-center" value="<?php echo $shareable_link; ?>" readonly>
-                <button class="btn btn-primary" onclick="copyLink()"><i class="bi bi-clipboard"></i> Copy Link</button>
-                
-                <hr>
-                <h4>Share via:</h4>
-                <div class="share-buttons">
-                    <!-- WhatsApp -->
-                    <a href="https://api.whatsapp.com/send?text=<?php echo urlencode('Check out this file: ' . $shareable_link); ?>" target="_blank" class="btn btn-success">
-                        <i class="bi bi-whatsapp"></i> WhatsApp
-                    </a>
-                    <!-- Gmail -->
-                    <a href="mailto:?subject=Sharing a File&body=Here is the file link: <?php echo urlencode($shareable_link); ?>" class="btn btn-danger">
-                        <i class="bi bi-envelope"></i> Gmail
-                    </a>
-                    <!-- Facebook -->
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode($shareable_link); ?>" target="_blank" class="btn btn-primary">
-                        <i class="bi bi-facebook"></i> Facebook
-                    </a>
-                    <!-- Instagram (Direct Message Sharing) -->
-                    <a href="https://www.instagram.com/direct/new/" target="_blank" class="btn btn-warning text-white">
-                        <i class="bi bi-instagram"></i> Instagram
-                    </a>
-                </div>
+if (!$file) {
+    die("File not found or unauthorized access!");
+}
 
-                <a href="managefiles.php" class="btn btn-secondary mt-3">Back</a>
-            </div>
-        </body>
-        </html>
-        <?php
-    } else {
-        die("File not found or unauthorized access!");
+// Handle form submission for email
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['recipient_email'])) {
+    $recipient_email = filter_var($_POST['recipient_email'], FILTER_VALIDATE_EMAIL);
+
+    if (!$recipient_email) {
+        die("<script>alert('Invalid email address!');</script>");
     }
-} else {
-    die("Invalid request!");
+
+    $file_path = __DIR__ . '/' . $file['file_path']; // Full path
+    $file_name = $file['file_name'];
+
+    if (!file_exists($file_path)) {
+        die("File not found!");
+    }
+
+    // Setup PHPMailer
+    $mail = new PHPMailer(true);
+
+    try {
+        // SMTP settings
+        $mail->isSMTP();
+        $mail->Host       = $_ENV['SMTP_HOST'];
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $_ENV['SMTP_USER'];
+        $mail->Password   = $_ENV['SMTP_PASS'];
+        $mail->SMTPSecure = $_ENV['SMTP_SECURE'];
+        $mail->Port       = $_ENV['SMTP_PORT'];
+
+        // Email content
+        $mail->setFrom($_ENV['SMTP_USER'], 'File Share System');
+        $mail->addAddress($recipient_email);
+        $mail->Subject = "File Shared: $file_name";
+        $sender_email = isset($_SESSION['email']) ? $_SESSION['email'] : 'Unknown';  
+        $sender_name = isset($_SESSION['name']) ? $_SESSION['name'] : 'Anonymous User';
+
+        $mail->Body = "Hello,\n\nA file has been shared with you. Please find the attachment.\n\nBest Regards,\n$sender_name ($sender_email)";
+
+        $mail->addAttachment($file_path, $file_name);
+        // Attach the file
+
+        // Send email
+        $mail->send();
+        echo "<script>alert('File sent successfully to $recipient_email'); window.location.href='managefiles.php';</script>";
+    } catch (Exception $e) {
+        echo "<script>alert('Email could not be sent. Mailer Error: {$mail->ErrorInfo}');</script>";
+    }
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share File</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light text-dark">
+    <div class="container mt-5 text-center">
+        <h2>Share File: <?php echo htmlspecialchars($file['file_name']); ?></h2>
+        
+        <form method="POST" class="mt-3">
+            <label for="recipient_email" class="form-label">Enter recipient's email:</label>
+            <input type="email" name="recipient_email" id="recipient_email" class="form-control mb-3" required>
+            <button type="submit" class="btn btn-primary">Send via Gmail</button>
+        </form>
+
+        <a href="managefiles.php" class="btn btn-secondary mt-3">Back</a>
+    </div>
+</body>
+</html>
