@@ -5,6 +5,7 @@
         "thiagoalessio/tesseract_ocr": "^2.13",
         "spatie/pdf-to-text": "^1.54",
         "mikehaertl/php-shellcommand": "^1.7",
-        "php-ai/php-ml": "^0.10.0"
+        "php-ai/php-ml": "^0.10.0",
+        "google/apiclient": "*"
     }
 }
