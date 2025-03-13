@@ -22,13 +22,13 @@ $query = mysqli_query($con, "SELECT *, DATEDIFF(NOW(), deleted_at) AS days_since
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Custom Scrollbar for better mobile experience */
+        /* Custom Scrollbar */
         .scroll-container {
             overflow-x: auto;
             white-space: nowrap;
         }
 
-        /* Premium Table Styling */
+        /* Custom Table Styling */
         .custom-table {
             border-radius: 10px;
             overflow: hidden;
@@ -78,7 +78,7 @@ $query = mysqli_query($con, "SELECT *, DATEDIFF(NOW(), deleted_at) AS days_since
     </style>
 </head>
 <body class="bg-gray-100 text-dark">
-    <!-- Modern Back Button -->
+    <!-- Back Button -->
     <div class="fixed top-4 left-4">
         <a href="dashboard.php" class="text-xl text-gray-700 hover:text-gray-900 flex items-center">
             <span class="text-2xl">&larr;</span> <!-- Left Arrow Icon -->
@@ -114,8 +114,8 @@ $query = mysqli_query($con, "SELECT *, DATEDIFF(NOW(), deleted_at) AS days_since
                                     </span>
                                 </td>
                                 <td data-label="Actions">
-                                    <a href="restore.php?file_id=<?php echo $file['id']; ?>" class="btn btn-outline-success btn-sm">Restore</a>
-                                    <a href="delete_permanent.php?file_id=<?php echo $file['id']; ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete this file?');">Delete Permanently</a>
+                                    <a href="restore.php?file_name=<?php echo urlencode($file['file_name']); ?>" class="btn btn-outline-success btn-sm">Restore</a>
+                                    <a href="delete_permanent.php?file_name=<?php echo urlencode($file['file_name']); ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete this file?');">Delete Permanently</a>
                                 </td>
                             </tr>
                         <?php } ?>
