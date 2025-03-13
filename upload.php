@@ -1,73 +1,47 @@
 <?php
 session_start();
 include('connect.php');
-require 'vendor/autoload.php'; // Load Google API Client Library
 
 // Check if user is logged in
 if (!isset($_SESSION['id'])) {
     die("Unauthorized access");
 }
 
-$user_id = $_SESSION['id']; // Get logged-in user ID
+$user_id = $_SESSION['id']; // Get the logged-in user ID
 
-// Initialize Google Client
-function getGoogleClient() {
-    $client = new Google_Client();
-    $client->setAuthConfig('credentials.json');
-    $client->setAccessType('offline');
-    $client->setScopes([Google_Service_Drive::DRIVE_FILE]);
-    $client->setRedirectUri('http://localhost/google-drive/callback.php');
-
-    if (isset($_SESSION['access_token'])) {
-        $client->setAccessToken($_SESSION['access_token']);
-    } else {
-        die("Google Drive authentication required. <a href='google_drive_auth.php'>Click here to login</a>");
-    }
-    
-    return $client;
-}
-
-// Function to upload file to Google Drive and save details in DB
-function uploadFileToDrive($fileInputName, $fileType, $dbCon, $userId) {
+// Function to handle file upload
+function uploadFile($fileInputName, $fileType, $dbCon, $userId) {
     if (isset($_FILES[$fileInputName]) && $_FILES[$fileInputName]['error'] === UPLOAD_ERR_OK) {
         $fileName = $_FILES[$fileInputName]['name'];
         $fileTmpName = $_FILES[$fileInputName]['tmp_name'];
         $fileSize = $_FILES[$fileInputName]['size'];
-        $fileMimeType = mime_content_type($fileTmpName);
-
-        // Get Google Client
-        $client = getGoogleClient();
-        $driveService = new Google_Service_Drive($client);
-
-        // Upload file to Google Drive
-        $fileMetadata = new Google_Service_Drive_DriveFile([
-            'name' => $fileName,
-            'mimeType' => $fileMimeType,
-            'parents' => ['root'] // Uploads file to the root folder
-        ]);
-
-        $fileContent = file_get_contents($fileTmpName);
-        $uploadedFile = $driveService->files->create($fileMetadata, [
-            'data' => $fileContent,
-            'mimeType' => $fileMimeType,
-            'uploadType' => 'multipart'
-        ]);
-
-        $fileId = $uploadedFile->getId();
-        $fileLink = "https://drive.google.com/file/d/$fileId/view";
-
-        // Save file details in database
-        $query = "INSERT INTO uploads (user_id, file_name, file_path, file_type, file_size, upload_time) 
-                  VALUES (?, ?, ?, ?, ?, NOW())";
-        $stmt = mysqli_prepare($dbCon, $query);
-        mysqli_stmt_bind_param($stmt, 'isssi', $userId, $fileName, $fileLink, $fileType, $fileSize);
-
-        if (mysqli_stmt_execute($stmt)) {
-            echo "<script>alert('File uploaded to Google Drive successfully!');</script>";
-        } else {
-            echo "<script>alert('Database error: " . mysqli_error($dbCon) . "');</script>";
+        $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
+        $uploadDir = 'uploads/'; // Relative directory to store files
+        
+        // Ensure the directory exists
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
         }
-        mysqli_stmt_close($stmt);
+
+        $newFileName = time() . "_" . basename($fileName);
+        $uploadPath = $uploadDir . $newFileName;
+        
+        // Move file to upload directory
+        if (move_uploaded_file($fileTmpName, $uploadPath)) {
+            $query = "INSERT INTO uploads (user_id, file_name, file_path, file_type, file_size, upload_time) 
+                      VALUES (?, ?, ?, ?, ?, NOW())";
+            $stmt = mysqli_prepare($dbCon, $query);
+            mysqli_stmt_bind_param($stmt, 'isssi', $userId, $fileName, $uploadPath, $fileType, $fileSize);
+            
+            if (mysqli_stmt_execute($stmt)) {
+                echo "<script>alert('File uploaded successfully!');</script>";
+            } else {
+                echo"<script>alert('Database error: . mysqli_error($dbCon) .');</script>";
+            }
+            mysqli_stmt_close($stmt);
+        } else {
+            echo "<script>alert('Failed to move uploaded file');</script>";
+        }
     } else {
         echo "<script>alert('No file selected or Upload error');</script>";
     }
@@ -75,21 +49,19 @@ function uploadFileToDrive($fileInputName, $fileType, $dbCon, $userId) {
 
 // Handling folder upload
 if (isset($_POST['ufolder'])) {
-    uploadFileToDrive('folder', 'folder', $con, $user_id);
+    uploadFile('folder', 'folder', $con, $user_id);
 }
 
 // Handling video upload
 if (isset($_POST['uvideo'])) {
-    uploadFileToDrive('video', 'video', $con, $user_id);
+    uploadFile('video', 'video', $con, $user_id);
 }
 
 // Handling image upload
 if (isset($_POST['uimgage'])) {
-    uploadFileToDrive('image', 'image', $con, $user_id);
+    uploadFile('image', 'image', $con, $user_id);
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
