@@ -264,6 +264,7 @@
     <a href="upload.php"><i class="bi bi-upload"></i> <span class="link-text">Upload Files</span></a>
     <a href="managefiles.php"><i class="bi bi-folder"></i> <span class="link-text">Manage Files</span></a>
     <a href="recently_deleted.php"><i class="bi bi-trash"></i> <span class="link-text">Recycle Bin</span></a>
+    <a href="shared_file.php"><i class="bi bi-share"></i> <span class="link-text">Shared Files</span></a>
     <button class="toggle-btn" id="toggle-btn">&#x25C0;</button>
 </div>
     <!-- Profile Dropdown -->

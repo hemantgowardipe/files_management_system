@@ -2,8 +2,12 @@
 session_start();
 include('connect.php');
 
-// Fetch all users from the database
-$usersQuery = mysqli_query($con, "SELECT * FROM register");
+// Fetch all users with shared file count
+$usersQuery = mysqli_query($con, "
+    SELECT r.*, 
+           (SELECT COUNT(*) FROM shared_files sf WHERE sf.sender_id = r.id) AS shared_count 
+    FROM register r
+");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,14 +27,8 @@ $usersQuery = mysqli_query($con, "SELECT * FROM register");
             animation: fadeIn 1s ease-out forwards;
         }
         @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         .sidebar {
             height: 100vh;
@@ -124,6 +122,7 @@ $usersQuery = mysqli_query($con, "SELECT * FROM register");
                             <th>User ID</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Total Files Shared</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -131,10 +130,11 @@ $usersQuery = mysqli_query($con, "SELECT * FROM register");
                     <tbody>
                         <?php while ($user = mysqli_fetch_assoc($usersQuery)): ?>
                         <tr>
-                        <td><?php echo $user['id']; ?></td>
-                        <td><?php echo $user['name']; ?></td>
-                        <td><?php echo $user['email']; ?></td>
-                        <td>
+                            <td><?php echo $user['id']; ?></td>
+                            <td><?php echo $user['name']; ?></td>
+                            <td><?php echo $user['email']; ?></td>
+                            <td><?php echo $user['shared_count']; ?></td> <!-- Show shared file count -->
+                            <td>
                                 <span class="badge bg-<?php echo $user['status'] === 'Active' ? 'success' : 'secondary'; ?>">
                                     <?php echo $user['status']; ?>
                                 </span>
@@ -156,6 +156,7 @@ $usersQuery = mysqli_query($con, "SELECT * FROM register");
     </div>
 </body>
 </html>
+
 <!-- User actions script -->
 <script>
         $(document).ready(function () {
