@@ -1,18 +1,17 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-require 'vendor/autoload.php'; // Load PHPMailer
+require 'vendor/autoload.php'; // Load dependencies
 include('connect.php');
 
-// Load environment variables
+// Load .env variables
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 function sendConfirmationEmail($user_email) {
-    global $con; // Use the database connection
+    global $con; // Use database connection
 
-    // Fetch user details from the `register` table
+    // Fetch user details from the register table
     $query = mysqli_query($con, "SELECT * FROM register WHERE email = '$user_email'");
     $user = mysqli_fetch_assoc($query);
 
@@ -20,33 +19,32 @@ function sendConfirmationEmail($user_email) {
         return "User not found!";
     }
 
-    // User details
     $userName = $user['name'];
     $userMobile = $user['mobile'];
-    $registrationDate = $user['date'];  // Ensure 'date' column exists or use `registration_date`
+    $registrationDate = $user['date'];
     $status = $user['status'];
-    $userPassword = $user['pass']; // ⚠️ Avoid sending plaintext passwords via email
-    $profilePhoto = "http://localhost/file_system/profile_img/" . $user['photo']; // Adjust path if needed
+    $userPassword = $user['pass']; // Consider hashing passwords instead of sending plain text!
+    $profilePhoto = "http://localhost/file_system/profile_img/" . $user['photo']; // Adjust the path if needed
 
     $mail = new PHPMailer(true);
 
     try {
         // SMTP Configuration
         $mail->isSMTP();
-        $mail->Host       = getenv('SMTP_HOST'); 
-        $mail->SMTPAuth   = true;
-        $mail->Username   = getenv('SMTP_USER'); 
-        $mail->Password   = getenv('SMTP_PASS'); 
-        $mail->SMTPSecure = getenv('SMTP_SECURE') === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = getenv('SMTP_PORT'); 
+        $mail->Host = $_ENV['SMTP_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Username = $_ENV['SMTP_USER'];
+        $mail->Password = $_ENV['SMTP_PASS'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = $_ENV['SMTP_PORT'];
 
-        // Sender details
-        $mail->setFrom(getenv('SMTP_USER'), 'File_System');
+        // Email Details
+        $mail->setFrom($_ENV['SMTP_USER'], 'File_System');
         $mail->addAddress($user_email, $userName);
         $mail->Subject = 'Welcome to Our Platform!';
         $mail->isHTML(true);
 
-        // Email body
+        // Email Body with Registration Details
         $mail->Body = "
             <h3>Hi, $userName! 👋</h3>
             <p>Thank you for registering on our platform.</p>
@@ -57,7 +55,7 @@ function sendConfirmationEmail($user_email) {
                 <li><strong>Mobile:</strong> $userMobile</li>
             </ul>
             <p>We are excited to have you onboard!</p>
-            <p>Best Regards!<br>Hemant Gowardipe</p>
+            <P>Best Regars! <br>Hemant Gowardipe</br></p>
         ";
 
         return $mail->send() ? true : "Mailer Error: " . $mail->ErrorInfo;
@@ -65,4 +63,4 @@ function sendConfirmationEmail($user_email) {
         return "Exception Error: " . $e->getMessage();
     }
 }
-?>
+?> 
