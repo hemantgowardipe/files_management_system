@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 13, 2025 at 07:37 AM
+-- Generation Time: Mar 20, 2025 at 03:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -73,6 +73,31 @@ INSERT INTO `register` (`id`, `date`, `name`, `mobile`, `email`, `photo`, `pass`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shared_files`
+--
+
+CREATE TABLE `shared_files` (
+  `id` int(11) NOT NULL,
+  `recipient_id` int(100) NOT NULL,
+  `file_id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `recipient_email` varchar(255) NOT NULL,
+  `shared_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shared_files`
+--
+
+INSERT INTO `shared_files` (`id`, `recipient_id`, `file_id`, `sender_id`, `recipient_email`, `shared_at`) VALUES
+(2, 15, 15, 1, '', '2025-03-18 08:38:01'),
+(3, 16, 22, 1, '', '2025-03-18 08:40:00'),
+(4, 1, 34, 15, '', '2025-03-18 09:00:03'),
+(5, 15, 22, 1, '', '2025-03-18 09:02:28');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `uploads`
 --
 
@@ -106,16 +131,16 @@ INSERT INTO `uploads` (`id`, `user_id`, `file_name`, `file_path`, `file_type`, `
 (11, 1, 'IMG_20250131_155750.jpg', 'uploads/1739958691_IMG_20250131_155750.jpg', 'image', 22790412, '2025-02-19 09:51:31', '2025-02-19 09:51:31', NULL, NULL),
 (12, 1, 'DSA PLan.pdf', 'uploads/1739971933_DSA PLan.pdf', 'folder', 29706, '2025-02-19 13:32:13', '2025-02-19 13:32:13', NULL, NULL),
 (13, 1, 'Chhatrapati-Shivaji-Maharaj-The-Fearless-Warrior-Status-Videos.mp4', 'uploads/1739972185_Chhatrapati-Shivaji-Maharaj-The-Fearless-Warrior-Status-Videos.mp4', 'video', 7143580, '2025-02-19 13:36:25', '2025-02-19 13:36:25', NULL, NULL),
-(14, 1, '10th Marksheet.pdf', 'uploads/1740118818_10th Marksheet.pdf', 'folder', 178900, '2025-02-21 06:20:18', '2025-02-21 06:20:18', NULL, NULL),
 (15, 1, 'car', 'uploads/1740563588_car_drift.mp4', 'video', 13634329, '2025-02-26 09:53:08', '2025-02-26 09:53:08', NULL, NULL),
 (16, 1, 'IMG_20250131_155806.jpg', 'uploads/1740564348_IMG_20250131_155806.jpg', 'image', 163342, '2025-02-26 10:05:48', '2025-02-26 10:05:48', NULL, NULL),
 (20, 1, 'gitprofile.jpg', 'uploads/1740838034_gitprofile.jpg', 'image', 1615855, '2025-03-01 14:07:14', '2025-03-01 14:07:14', NULL, NULL),
 (22, 1, 'gitprofile (1).jpg', 'uploads/1740852589_gitprofile (1).jpg', 'image', 430051, '2025-03-01 18:09:49', '2025-03-01 18:09:49', NULL, NULL),
-(23, 1, '20240130_162012.jpg', 'uploads/1740907444_20240130_162012.jpg', 'image', 5932064, '2025-03-02 09:25:37', '2025-03-02 09:25:37', NULL, NULL),
 (31, 15, 'Screenshot 2025-03-05 235203.png', 'uploads/1741845063_Screenshot 2025-03-05 235203.png', 'image', 0, '2025-03-13 06:20:14', '2025-03-13 06:20:14', NULL, NULL),
 (32, 15, 'Frontend_Performance report.pdf', 'uploads/1741847214_Frontend_Performance report.pdf', 'video', 258236, '2025-03-13 06:26:54', '2025-03-13 06:26:54', NULL, NULL),
 (33, 15, 'RTFMS_System_Architecture.png', 'uploads/1741847354_RTFMS_System_Architecture.png', 'folder', 400735, '2025-03-13 06:29:14', '2025-03-13 06:29:14', NULL, NULL),
-(34, 15, 'Voiceover_Script.pdf', 'uploads/1741847386_Voiceover_Script.pdf', 'folder', 21033, '2025-03-13 06:29:46', '2025-03-13 06:29:46', NULL, NULL);
+(34, 15, 'Voiceover_Script.pdf', 'uploads/1741847386_Voiceover_Script.pdf', 'folder', 21033, '2025-03-13 06:29:46', '2025-03-13 06:29:46', NULL, NULL),
+(36, 1, '20240130_162012.jpg', 'uploads/1740907444_20240130_162012.jpg', 'image', 0, '2025-03-15 11:41:54', '2025-03-15 11:41:54', NULL, NULL),
+(37, 1, '10th Marksheet.pdf', 'uploads/1740118818_10th Marksheet.pdf', 'folder', 0, '2025-03-18 09:24:36', '2025-03-18 09:24:36', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -147,7 +172,21 @@ INSERT INTO `user_activity` (`id`, `user_id`, `login_time`, `logout_time`, `dura
 (10, 1, '2025-03-03 19:58:07', '2025-03-03 20:03:37', 330),
 (11, 1, '2025-03-03 20:32:31', '2025-03-03 20:35:22', 171),
 (12, 1, '2025-03-12 22:38:54', NULL, 0),
-(13, 15, '2025-03-13 11:07:01', '2025-03-13 12:01:09', 3248);
+(13, 15, '2025-03-13 11:07:01', '2025-03-13 12:01:09', 3248),
+(14, 15, '2025-03-14 00:25:49', '2025-03-14 00:26:43', 54),
+(15, 1, '2025-03-15 17:09:16', '2025-03-15 17:12:31', 195),
+(16, 15, '2025-03-16 20:38:12', '2025-03-16 20:38:48', 36),
+(17, 1, '2025-03-16 20:40:19', NULL, 0),
+(18, 15, '2025-03-16 20:43:25', '2025-03-16 20:45:35', 130),
+(19, 1, '2025-03-16 20:45:44', '2025-03-16 20:46:53', 394),
+(20, 1, '2025-03-18 13:23:13', '2025-03-18 14:17:22', 3249),
+(21, 15, '2025-03-18 14:17:34', '2025-03-18 14:30:10', 756),
+(22, 1, '2025-03-18 14:30:17', '2025-03-18 14:32:34', 137),
+(23, 15, '2025-03-18 14:32:45', NULL, 0),
+(24, 1, '2025-03-18 14:51:40', '2025-03-18 15:06:12', 872),
+(25, 1, '2025-03-18 15:18:33', '2025-03-18 15:18:36', 3),
+(26, 1, '2025-03-18 15:21:44', '2025-03-18 15:22:33', 49),
+(27, 15, '2025-03-18 15:22:51', '2025-03-18 15:23:38', 47);
 
 --
 -- Indexes for dumped tables
@@ -164,6 +203,14 @@ ALTER TABLE `recently_deleted`
 --
 ALTER TABLE `register`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `shared_files`
+--
+ALTER TABLE `shared_files`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `file_id` (`file_id`),
+  ADD KEY `fk_sender` (`sender_id`);
 
 --
 -- Indexes for table `uploads`
@@ -187,7 +234,7 @@ ALTER TABLE `user_activity`
 -- AUTO_INCREMENT for table `recently_deleted`
 --
 ALTER TABLE `recently_deleted`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `register`
@@ -196,20 +243,33 @@ ALTER TABLE `register`
   MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
+-- AUTO_INCREMENT for table `shared_files`
+--
+ALTER TABLE `shared_files`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `uploads`
 --
 ALTER TABLE `uploads`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `user_activity`
 --
 ALTER TABLE `user_activity`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `shared_files`
+--
+ALTER TABLE `shared_files`
+  ADD CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `register` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `shared_files_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `uploads` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `uploads`
